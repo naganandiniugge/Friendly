@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friendly - Grow Friendships Naturally</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        .quote {
+            font-style: italic;
+            color: #555;
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .auth-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-signup {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-signin {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-buttons">
+        <button class="btn btn-signup" onclick="location.href='signup.html'">Sign Up</button>
+        <button class="btn btn-signin" onclick="location.href='signin.html'">Sign In</button>
+    </div>
+    
+    <div class="container">
+        <h1>Friendly</h1>
+        <div class="quote">
+            "We didn't build another social app - we planted a digital garden where friendships grow naturally, 
+            kindness is the sunshine, and every user helps nurture the community."
+        </div>
+    </div>
+</body>
+</html>

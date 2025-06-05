@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Friendly</title>
+  <!-- Load face-api.js -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --secondary-color: #f8f8f8;
+      --border-color: #e0e0e0;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --border-radius: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--secondary-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .profile-container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-color);
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .username {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .bio {
+      text-align: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+    }
+
+    .edit-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      margin-bottom: 20px;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .edit-btn:hover {
+      background-color: #3367d6;
+    }
+
+    .content-tabs {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 15px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid var(--primary-color);
+      font-weight: 600;
+    }
+
+    .content-area {
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logout-btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      width: 100%;
+      max-width: 500px;
+      transition: background-color 0.2s;
+    }
+
+    .logout-btn:hover {
+      background-color: #cc0000;
+    }
+
+    /* Three dots menu styles */
+    .menu-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 5px;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      width: 200px;
+      z-index: 10;
+      display: none;
+      padding: 10px 0;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .submenu {
+      display: none;
+      padding-left: 15px;
+    }
+
+    .submenu.show {
+      display: block;
+    }
+
+    .submenu-item {
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+
+    .submenu-item:hover {
+      background-color: var(--secondary-color);
+    }
+
+    .submenu-item.selected {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .arrow {
+      transition: transform 0.2s;
+    }
+
+    .arrow.rotated {
+      transform: rotate(90deg);
+    }
+
+    /* Modal styles */
+    #editProfileModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    #editProfileModal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    #editProfileModal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .save-btn:hover {
+      background-color: #3367d6;
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4caf50;
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 2000;
+      animation: fadeIn 0.3s, fadeOut 0.3s 1.7s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, 10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translate(-50%, 0); }
+      to { opacity: 0; transform: translate(-50%, 10px); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: none;
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Face detection canvas (hidden) */
+    #faceDetectionCanvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <!-- Three dots menu button -->
+    <div class="menu-button" id="menuButton">⋮</div>
+    
+    <!-- Dropdown menu -->
+    <div class="dropdown-menu" id="dropdownMenu">
+      <div class="dropdown-item" id="savedPosts">Saved Posts</div>
+      <div class="dropdown-item" id="notifications">Notifications</div>
+      
+      <!-- Online Status with submenu -->
+      <div class="dropdown-item" id="onlineStatus">
+        <span>Online Status</span>
+        <span class="arrow">›</span>
+      </div>
+      <div class="submenu" id="onlineStatusSubmenu">
+        <div class="submenu-item" data-value="everyone">To Everyone</div>
+        <div class="submenu-item" data-value="none">To None</div>
+        <div class="submenu-item" data-value="followers">To Followers</div>
+      </div>
+      
+      <!-- Privacy Settings with submenu -->
+      <div class="dropdown-item" id="privacySettings">
+        <span>Privacy Settings</span>
+        <span class="arrow">›</span>
+      </div>
+      <div class="submenu" id="privacySettingsSubmenu">
+        <div class="submenu-item" data-value="everyone">To Everyone</div>
+        <div class="submenu-item" data-value="none">To None</div>
+        <div class="submenu-item" data-value="followers">To Followers</div>
+      </div>
+    </div>
+
+    <div class="profile-header">
+      <h1>Profile</h1>
+    </div>
+    
+    <div class="profile-info">
+      <img src="default.jpg" alt="Profile Picture" class="profile-pic" id="profilePicture">
+      <div class="username" id="username">NANDINI</div>
+      
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Following</span>
+        </div>
+      </div>
+      
+      <div class="bio" id="bio">Srv</div>
+      
+      <button class="edit-btn" id="editProfileBtn">Edit Profile</button>
+    </div>
+    
+    <div class="content-tabs">
+      <div class="tab active">Posts</div>
+      <div class="tab">Saved</div>
+    </div>
+    
+    <div class="content-area">
+      <p>Your posts will appear here</p>
+    </div>
+  </div>
+  
+  <button class="logout-btn" id="logoutBtn">Logout</button>
+
+  <!-- Edit Profile Modal -->
+  <div id="editProfileModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <button class="close-btn" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="form-group">
+        <label for="profileImageInput">Profile Picture</label>
+        <input type="file" id="profileImageInput" accept="image/*">
+        <div class="spinner" id="imageSpinner"></div>
+        <p id="imageRequirements" style="font-size: 0.8rem; color: #666;">
+          Please upload a clear photo of your face. The image must be less than 2MB.
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="usernameInput">Username</label>
+        <input type="text" id="usernameInput">
+      </div>
+      <div class="form-group">
+        <label for="bioInput">Bio</label>
+        <textarea id="bioInput" rows="3"></textarea>
+      </div>
+      <button class="save-btn" id="saveProfileBtn">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">Profile updated successfully!</div>
+
+  <!-- Hidden canvas for face detection -->
+  <canvas id="faceDetectionCanvas"></canvas>
+
+  <script>
+    // DOM Elements
+    const menuButton = document.getElementById('menuButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const onlineStatus = document.getElementById('onlineStatus');
+    const privacySettings = document.getElementById('privacySettings');
+    const onlineStatusSubmenu = document.getElementById('onlineStatusSubmenu');
+    const privacySettingsSubmenu = document.getElementById('privacySettingsSubmenu');
+    const onlineStatusArrows = onlineStatus.querySelector('.arrow');
+    const privacySettingsArrows = privacySettings.querySelector('.arrow');
+    const profilePicture = document.getElementById('profilePicture');
+    const username = document.getElementById('username');
+    const bio = document.getElementById('bio');
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const editProfileModal = document.getElementById('editProfileModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const profileImageInput = document.getElementById('profileImageInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const bioInput = document.getElementById('bioInput');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const toast = document.getElementById('toast');
+    const imageSpinner = document.getElementById('imageSpinner');
+    const faceDetectionCanvas = document.getElementById('faceDetectionCanvas');
+    const ctx = faceDetectionCanvas.getContext('2d');
+
+    // State variables
+    let modelsLoaded = false;
+    let isProcessingImage = false;
+
+    // Initialize face detection models
+    async function loadFaceDetectionModels() {
+      try {
+        // Show loading state
+        imageSpinner.style.display = 'block';
+        
+        // Load the models from the CDN
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
+        
+        modelsLoaded = true;
+        console.log('Face detection models loaded successfully');
+      } catch (error) {
+        console.error('Error loading face detection models:', error);
+        showToast('Error loading face detection. Please refresh the page.');
+      } finally {
+        imageSpinner.style.display = 'none';
+      }
+    }
+
+    // Initialize profile data
+    function initProfile() {
+      const savedProfile = JSON.parse(localStorage.getItem('profile')) || {
+        username: 'NANDINI',
+        bio: 'Srv',
+        image: 'default.jpg'
+      };
+
+      // Apply saved data to UI
+      profilePicture.src = savedProfile.image;
+      username.textContent = savedProfile.username;
+      bio.textContent = savedProfile.bio;
+
+      // Save default data if none exists
+      if (!localStorage.getItem('profile')) {
+        localStorage.setItem('profile', JSON.stringify(savedProfile));
+      }
+
+      // Load face detection models after profile is initialized
+      loadFaceDetectionModels();
+    }
+
+    // Load profile and models on start
+    document.addEventListener('DOMContentLoaded', initProfile);
+
+    // Toggle dropdown menu
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdownMenu.contains(e.target) && e.target !== menuButton) {
+        dropdownMenu.classList.remove('show');
+        onlineStatusSubmenu.classList.remove('show');
+        privacySettingsSubmenu.classList.remove('show');
+        onlineStatusArrows.classList.remove('rotated');
+        privacySettingsArrows.classList.remove('rotated');
+      }
+    });
+
+    // Toggle online status submenu
+    onlineStatus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onlineStatusSubmenu.classList.toggle('show');
+      onlineStatusArrows.classList.toggle('rotated');
+      
+      // Close other submenu if open
+      if (privacySettingsSubmenu.classList.contains('show')) {
+        privacySettingsSubmenu.classList.remove('show');
+        privacySettingsArrows.classList.remove('rotated');
+      }
+    });
+
+    // Toggle privacy settings submenu
+    privacySettings.addEventListener('click', (e) => {
+      e.stopPropagation();
+      privacySettingsSubmenu.classList.toggle('show');
+      privacySettingsArrows.classList.toggle('rotated');
+      
+      // Close other submenu if open
+      if (onlineStatusSubmenu.classList.contains('show')) {
+        onlineStatusSubmenu.classList.remove('show');
+        onlineStatusArrows.classList.remove('rotated');
+      }
+    });
+
+    // Handle submenu item selection
+    function handleSubmenuSelection(submenu, selectedValue) {
+      const items = submenu.querySelectorAll('.submenu-item');
+      
+      items.forEach(item => {
+        item.classList.remove('selected');
+        if (item.getAttribute('data-value') === selectedValue) {
+          item.classList.add('selected');
+        }
+      });
+      
+      // Save to local storage
+      const profile = JSON.parse(localStorage.getItem('profile')) || {};
+      if (submenu === onlineStatusSubmenu) {
+        profile.onlineStatus = selectedValue;
+      } else {
+        profile.privacySetting = selectedValue;
+      }
+      localStorage.setItem('profile', JSON.stringify(profile));
+    }
+
+    // Online status selection
+    onlineStatusSubmenu.querySelectorAll('.submenu-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const selectedValue = e.target.getAttribute('data-value');
+        handleSubmenuSelection(onlineStatusSubmenu, selectedValue);
+      });
+    });
+
+    // Privacy settings selection
+    privacySettingsSubmenu.querySelectorAll('.submenu-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const selectedValue = e.target.getAttribute('data-value');
+        handleSubmenuSelection(privacySettingsSubmenu, selectedValue);
+      });
+    });
+
+    // Tab switching functionality
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+
+    // Open edit profile modal
+    editProfileBtn.addEventListener('click', () => {
+      const savedProfile = JSON.parse(localStorage.getItem('profile')) || {};
+      usernameInput.value = savedProfile.username;
+      bioInput.value = savedProfile.bio;
+      editProfileModal.classList.add('active');
+    });
+
+    // Close edit profile modal
+    closeModalBtn.addEventListener('click', () => {
+      editProfileModal.classList.remove('active');
+    });
+
+    // Close modal when clicking outside
+    editProfileModal.addEventListener('click', (e) => {
+      if (e.target === editProfileModal) {
+        editProfileModal.classList.remove('active');
+      }
+    });
+
+    // Save profile changes
+    saveProfileBtn.addEventListener('click', () => {
+      const profile = JSON.parse(localStorage.getItem('profile')) || {};
+      
+      // Update username if changed (fixed after first change)
+      if (usernameInput.value.trim() && !profile.usernameFixed) {
+        profile.username = usernameInput.value.trim();
+        profile.usernameFixed = true; // Mark username as fixed
+      }
+      
+      // Always allow bio changes
+      profile.bio = bioInput.value.trim();
+      
+      // Save to local storage
+      localStorage.setItem('profile', JSON.stringify(profile));
+      
+      // Update UI
+      username.textContent = profile.username;
+      bio.textContent = profile.bio;
+      
+      // Close modal
+      editProfileModal.classList.remove('active');
+      
+      // Show success message
+      showToast('Profile updated successfully!');
+    });
+
+    // Detect faces in an image
+    async function detectFaces(image) {
+      if (!modelsLoaded) {
+        throw new Error('Face detection models not loaded');
+      }
+
+      // Set canvas dimensions to match the image
+      faceDetectionCanvas.width = image.width;
+      faceDetectionCanvas.height = image.height;
+      ctx.drawImage(image, 0, 0);
+
+      // Detect faces using the tiny face detector model
+      const detections = await faceapi.detectAllFaces(
+        faceDetectionCanvas,
+        new faceapi.TinyFaceDetectorOptions()
+      );
+
+      return detections;
+    }
+
+    // Handle profile image upload with face detection
+    profileImageInput.addEventListener('change', async (e) => {
+      if (isProcessingImage) return;
+      
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        isProcessingImage = true;
+        imageSpinner.style.display = 'block';
+
+        // Validate file type (must be image)
+        if (!file.type.match('image.*')) {
+          showToast('Please select an image file (JPEG, PNG)');
+          return;
+        }
+
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('Image must be less than 2MB');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          
+          await img.decode(); // Wait for image to load
+          
+          // Check if models are loaded
+          if (!modelsLoaded) {
+            showToast('Face detection is still loading, please try again');
+            return;
+          }
+
+          // Detect faces in the image
+          const detections = await detectFaces(img);
+          
+          if (detections.length === 0) {
+            showToast('No human face detected. Please upload an image with a clear face.');
+            return;
+          }
+          
+          if (detections.length > 1) {
+            showToast('Multiple faces detected. Please upload an image with only one face.');
+            return;
+          }
+
+          // Check face size (should be reasonably large)
+          const face = detections[0].box;
+          const faceArea = face.width * face.height;
+          const imageArea = img.width * img.height;
+          const faceCoverage = faceArea / imageArea;
+
+          if (faceCoverage < 0.1) { // Face should cover at least 10% of the image
+            showToast('Face is too small in the image. Please upload a closer photo.');
+            return;
+          }
+
+          // Check face position (should be roughly centered)
+          const centerX = img.width / 2;
+          const centerY = img.height / 2;
+          const faceCenterX = face.x + face.width / 2;
+          const faceCenterY = face.y + face.height / 2;
+          const xOffset = Math.abs(faceCenterX - centerX) / img.width;
+          const yOffset = Math.abs(faceCenterY - centerY) / img.height;
+
+          if (xOffset > 0.3 || yOffset > 0.3) {
+            showToast('Face should be more centered in the image.');
+            return;
+          }
+
+          // All checks passed - update profile picture
+          profilePicture.src = event.target.result;
+          
+          // Save to local storage
+          const profile = JSON.parse(localStorage.getItem('profile')) || {};
+          profile.image = event.target.result;
+          localStorage.setItem('profile', JSON.stringify(profile));
+          
+          showToast('Profile picture updated!');
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        showToast('Error processing image. Please try another photo.');
+      } finally {
+        isProcessingImage = false;
+        imageSpinner.style.display = 'none';
+      }
+    });
+
+    // Show toast notification
+    function showToast(message, isError = false) {
+      toast.textContent = message;
+      toast.style.backgroundColor = isError ? '#ff4444' : '#4caf50';
+      toast.style.display = 'block';
+      
+      // Clear any existing timeout
+      if (toast.timeoutId) {
+        clearTimeout(toast.timeoutId);
+      }
+      
+      toast.timeoutId = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+
+    // Logout functionality
+    logoutBtn.addEventListener('click', () => {
+      // In a real app, you would clear session data here
+      window.location.href = 'index.html';
+    });
+
+    // Close modal when pressing Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && editProfileModal.classList.contains('active')) {
+        editProfileModal.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
